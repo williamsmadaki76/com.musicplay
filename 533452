@@ -1,0 +1,12 @@
+
+# MUSIC PLAY - Ready-to-upload project
+
+This repository contains the MUSIC PLAY React + Capacitor project (version 2.4.8).
+Upload to GitHub and use Codemagic to build Android APK/AAB files.
+
+Build locally:
+npm install
+npm run build
+npx cap sync android
+npx cap open android
+Then build in Android Studio.

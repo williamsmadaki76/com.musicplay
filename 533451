@@ -1,0 +1,6 @@
+{
+  "appId": "com.williamsmadaki.musicplay",
+  "appName": "MUSIC PLAY",
+  "webDir": "build",
+  "bundledWebRuntime": false
+}

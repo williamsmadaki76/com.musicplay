@@ -1,0 +1,71 @@
+
+import React, { useState, useEffect, useRef } from 'react';
+import { AdMob, RewardAdPluginEvents } from '@capacitor-community/admob';
+
+const APP_VERSION = "2.4.8";
+
+export default function App(){ 
+  const [coins,setCoins] = useState(()=> parseInt(localStorage.getItem('coins'))||0);
+  const [tracks,setTracks] = useState(()=> JSON.parse(localStorage.getItem('tracks')||'[]'));
+  const [currentTrack,setCurrentTrack] = useState(null);
+  const audioRef = useRef(null);
+
+  useEffect(()=>{
+    const init = async ()=>{
+      try{ await AdMob.initialize({requestTrackingAuthorization:true,initializeForTesting:true}); }catch(e){}
+    };
+    init();
+  },[]);
+
+  async function handleWatchAd(){ 
+    try{
+      await AdMob.prepareRewardVideoAd({ adId: 'ca-app-pub-3940256099942544/5224354917' });
+      return new Promise((resolve,reject)=>{
+        const listener = AdMob.addListener(RewardAdPluginEvents.Rewarded, (reward)=>{ listener.remove(); resolve(reward.amount||3); });
+        AdMob.showRewardVideoAd().catch(err=>{ listener.remove(); reject(err); });
+      }).then(r=>{ setCoins(c=>c+parseInt(r||3)); alert('You earned '+ (r||3) + ' coins'); });
+    }catch(e){ alert('Ad not available'); }
+  }
+
+  function handleFileImport(e){
+    const files = Array.from(e.target.files || []);
+    const newTracks = files.map(f=>({name:f.name,url:URL.createObjectURL(f)}));
+    setTracks(prev=>[...prev,...newTracks]);
+  }
+
+  function playTrack(t){ setCurrentTrack(t); if(audioRef.current) audioRef.current.src = t.url; }
+
+  return (<div style={{maxWidth:960,margin:'0 auto',padding:20}}>
+    <header style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+      <h1>MUSIC PLAY</h1>
+      <div>v{APP_VERSION}</div>
+    </header>
+
+    <section style={{background:'rgba(255,255,255,0.03)',padding:12,borderRadius:8,marginTop:12}}>
+      <div>Coins: {coins} <button onClick={handleWatchAd} style={{marginLeft:10}}>Watch Ad</button></div>
+      <div style={{marginTop:8}}>
+        <strong>Themes</strong>
+        <div style={{marginTop:6}}>
+          <button onClick={()=>alert('Default theme active')}>Dark (default)</button>
+        </div>
+      </div>
+    </section>
+
+    <section style={{background:'rgba(255,255,255,0.03)',padding:12,borderRadius:8,marginTop:12}}>
+      <h3>Library</h3>
+      <input type="file" accept="audio/*" multiple onChange={handleFileImport} />
+      <ul>
+        {tracks.map((t,i)=>(<li key={i} style={{display:'flex',justifyContent:'space-between'}}>
+          <span onClick={()=>playTrack(t)} style={{cursor:'pointer'}}>{t.name}</span>
+        </li>))}
+      </ul>
+    </section>
+
+    {currentTrack && (<section style={{background:'rgba(255,255,255,0.03)',padding:12,borderRadius:8,marginTop:12}}>
+      <h3>Now Playing: {currentTrack.name}</h3>
+      <audio ref={audioRef} controls src={currentTrack.url} style={{width:'100%'}} />
+    </section>)}
+
+    <footer style={{textAlign:'center',marginTop:20,fontSize:12}}>© 2025 MUSIC PLAY • Williams Madaki Atinga</footer>
+  </div>)
+}
