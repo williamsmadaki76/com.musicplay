@@ -1,0 +1,58 @@
+workflows:
+  musicplay-debug:
+    name: MUSIC PLAY Debug APK
+    max_build_duration: 60
+    environment:
+      vars:
+        PACKAGE_NAME: "com.williamsmadaki.musicplay"
+      node: latest
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+      - name: Add Android platform
+        script: |
+          npx cap add android || true
+      - name: Sync Capacitor
+        script: |
+          npx cap sync android
+      - name: Build Debug APK
+        script: |
+          cd android
+          ./gradlew assembleDebug
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+    publishing:
+      email:
+        recipients:
+          - "williamsmadaki76@gmail.com"
+
+  musicplay-release:
+    name: MUSIC PLAY Release AAB
+    max_build_duration: 60
+    environment:
+      vars:
+        PACKAGE_NAME: "com.williamsmadaki.musicplay"
+      node: latest
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+      - name: Add Android platform
+        script: |
+          npx cap add android || true
+      - name: Sync Capacitor
+        script: |
+          npx cap sync android
+      - name: Build Release AAB
+        script: |
+          cd android
+          ./gradlew bundleRelease
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+    publishing:
+      email:
+        recipients:
+          - "williamsmadaki76@gmail.com"
